@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Praktik PID - Tipe Data Standar dalam Python (Kelas VII)</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-card: #334155;
+            --primary: #38bdf8;
+            --secondary: #818cf8;
+            --accent: #f59e0b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #cbd5e1;
+            --border: #475569;
+            --code-bg: #090d16;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER & TIMER PID */
+        header {
+            background: linear-gradient(90deg, #1e1b4b, #0f172a);
+            border-bottom: 2px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .title-area h1 {
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+
+        .title-area p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .timer-box {
+            background: var(--bg-panel);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timer-digits {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: var(--accent);
+            min-width: 75px;
+            text-align: center;
+        }
+
+        .btn-sm {
+            background: var(--bg-card);
+            color: #fff;
+            border: 1px solid var(--border);
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-sm:hover, .btn-sm:active {
+            background: var(--primary);
+            color: #000;
+        }
+
+        /* PAPAN SKOR KELOMPOK MINI DI ATAS */
+        .score-strip {
+            background: #131c31;
+            padding: 8px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .group-scores {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .group-pill {
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .group-pill.active-turn {
+            border-color: var(--accent);
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .group-pill span.pts {
+            background: var(--primary);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+        }
+
+        /* NAVIGASI TAHAP PRAKTIK */
+        nav {
+            display: flex;
+            background: #0b1120;
+            padding: 10px 24px;
+            gap: 10px;
+            overflow-x: auto;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 185px;
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            border: 2px solid transparent;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 0.98rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .nav-tab small {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #0284c7, #4f46e5);
+            color: #fff;
+            border-color: #7dd3fc;
+        }
+
+        .nav-tab.active small {
+            color: #fde047;
+        }
+
+        /* MAIN CONTAINER */
+        main {
+            flex: 1;
+            padding: 20px 28px;
+            max-width: 1550px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .badge-time {
+            background: rgba(245, 158, 11, 0.18);
+            border: 1px solid var(--accent);
+            color: #fde047;
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 20px;
+        }
+
+        .panel-box {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .panel-box h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.25rem;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 1.1rem;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .output-block {
+            background: #052e16;
+            border: 1px solid var(--success);
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 1.1rem;
+            color: #86efac;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+
+        .btn-action {
+            padding: 12px 22px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: var(--primary); color: #0f172a; }
+        .btn-success { background: var(--success); color: #052e16; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-accent { background: var(--accent); color: #000; }
+
+        .btn-action:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        /* ==========================================
+           TAHAP 1: SORTIR KARTU DATA DI PID (UNPLUGGED -> PLUGGED)
+           ========================================== */
+        .card-pool {
+            background: #0b1120;
+            border: 2px dashed var(--primary);
+            border-radius: 14px;
+            padding: 16px;
+            min-height: 110px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .data-card {
+            background: #1e3a8a;
+            border: 2px solid #60a5fa;
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-family: 'Consolas', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .data-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .data-card.selected {
+            background: var(--accent);
+            color: #000;
+            border-color: #fff;
+            transform: scale(1.08);
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.8);
+        }
+
+        .baskets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+
+        .basket {
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            min-height: 170px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .basket:hover {
+            border-color: var(--primary);
+            background: #263349;
+        }
+
+        .basket-header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .basket-header strong {
+            font-size: 1.15rem;
+            color: var(--primary);
+            font-family: monospace;
+        }
+
+        .basket-header span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .basket-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            flex: 1;
+            align-content: flex-start;
+        }
+
+        .placed-chip {
+            background: #14532d;
+            border: 1px solid #22c55e;
+            color: #dcfce7;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        /* ==========================================
+           TAHAP 2: STUDIO RAKIT KODE PYTHON DI PID
+           ========================================== */
+        .mission-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .mission-btn {
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            color: var(--text-light);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .mission-btn.active {
+            background: var(--primary);
+            color: #000;
+            border-color: #fff;
+        }
+
+        .symbol-pad {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 14px 0;
+            padding: 12px;
+            background: #0b1120;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .sym-btn {
+            background: #334155;
+            border: 2px solid #64748b;
+            color: #fde047;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .sym-btn:active, .sym-btn:hover {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .code-Assembly-line {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--code-bg);
+            padding: 16px;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            font-family: 'Consolas', monospace;
+            font-size: 1.3rem;
+            flex-wrap: wrap;
+        }
+
+        .code-input-pid {
+            flex: 1;
+            min-width: 260px;
+            background: #1e293b;
+            color: #38bdf8;
+            border: 2px solid #475569;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* REFERENCE MINI CARDS */
+        .ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .ref-card {
+            background: #0b1120;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .ref-card h4 {
+            color: var(--primary);
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .ref-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .ref-card code {
+            display: block;
+            background: #1e293b;
+            padding: 6px;
+            border-radius: 6px;
+            color: #fde047;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="title-area">
+            <h1>🖥️ Arena Praktik PID: Tipe Data Standar dalam Python</h1>
+            <p>Koding & KA Kelas VII • Bab 3 (Data dan Format) • Model Problem-Based Learning (1 Layar PID)</p>
+        </div>
+        <div class="header-controls">
+            <div class="timer-box">
+                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">WAKTU:</span>
+                <div class="timer-digits" id="timerDisplay">10:00</div>
+                <button class="btn-sm" onclick="toggleTimer()" id="btnTimerToggle">▶ Mulai</button>
+                <button class="btn-sm" onclick="setTimer(5)">5m</button>
+                <button class="btn-sm" onclick="setTimer(10)">10m</button>
+                <button class="btn-sm" onclick="setTimer(15)">15m</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- PAPAN SKOR KELOMPOK INTERAKTIF (Sentuh untuk memilih kelompok yang sedang maju ke PID) -->
+    <div class="score-strip">
+        <div style="font-size: 0.9rem; color: var(--text-muted);">
+            👆 <strong>Giliran Praktik di PID:</strong> Sentuh nama kelompok yang sedang maju (Otomatis dapat poin saat berhasil!)
+        </div>
+        <div class="group-scores" id="groupStrip"></div>
+    </div>
+
+    <!-- MENU TAHAP PEMBELAJARAN SESUAI RPM -->
+    <nav>
+        <button class="nav-tab active" onclick="switchTab(0, 10)">
+            <small>Langkah 1 & 2 (20 Menit)</small>
+            1. Pemantik & 7 Tipe Data
+        </button>
+        <button class="nav-tab" onclick="switchTab(1, 15)">
+            <small>Praktik Tahap 1 (15 Menit)</small>
+            2. Sortir Kartu Data di PID
+        </button>
+        <button class="nav-tab" onclick="switchTab(2, 15)">
+            <small>Praktik Tahap 2 (15 Menit)</small>
+            3. Studio Rakit Kode Python
+        </button>
+        <button class="nav-tab" onclick="switchTab(3, 10)">
+            <small>Langkah 5 Evaluasi (10 Menit)</small>
+            4. Detektif Bug & List vs Tuple
+        </button>
+        <button class="nav-tab" onclick="switchTab(4, 10)">
+            <small>Penutup (10 Menit)</small>
+            5. Podium Kelompok & Refleksi
+        </button>
+    </nav>
+
+    <main>
+        <!-- =========================================================
+             TAB 0: ORIENTASI MASALAH & REFERENSI 7 TIPE DATA
+             ========================================================= -->
+        <section class="tab-panel active" id="panel-0">
+            <div class="section-head">
+                <h2>🔍 Orientasi Masalah: Mengapa "23 + 7 = 237"?</h2>
+                <span class="badge-time">⏱️ Langkah 1 (10m) + Langkah 2 (10m)</span>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel-box">
+                    <h3>💡 Uji Coba Pemantik di Layar PID</h3>
+                    <p style="color:var(--text-muted); line-height:1.5; margin-bottom:12px;">
+                        Komputer tidak dapat menebak sendiri apakah sebuah data itu angka, teks, atau jenis lainnya. Kita harus menentukan <strong>Tipe Data</strong> agar program bekerja dengan benar!
+                    </p>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:14px 0;">
+                        <input type="number" id="pemantikA" value="23" style="width:90px; padding:10px; font-size:1.3rem; font-weight:bold; border-radius:8px; border:2px solid var(--primary); background:#0b1120; color:#fff; text-align:center;" oninput="updatePemantik()">
+                        <span style="font-size:1.6rem; font-weight:bold;">+</span>
+                        <input type="number" id="pemantikB" value="7" style="width:90px; padding:10px; font-size:1.3rem; font-weight:bold; border-radius:8px; border:2px solid var(--primary); background:#0b1120; color:#fff; text-align:center;" oninput="updatePemantik()">
+                        <button class="btn-action btn-danger" onclick="setPemantikMode('str')">Mode Teks (str)</button>
+                        <button class="btn-action btn-primary" onclick="setPemantikMode('int')">Mode Angka (int)</button>
+                    </div>
+                    <div class="code-block" id="pemantikCode">a = "23"
+b = "7"
+print(a + b)</div>
+                    <div class="output-block" id="pemantikOutput">Output: "237" (Karena diapit tanda kutip, dianggap teks/string!)</div>
+                </div>
+
+                <div class="panel-box">
+                    <h3>📚 Peta Ciri Khas 7 Tipe Data Standar dalam Python</h3>
+                    <p style="color:var(--text-muted); font-size:0.95rem;">Amati tanda baca khas masing-masing tipe data sebelum kelompokmu maju merakit kode di PID:</p>
+                    <div class="ref-grid">
+                        <div class="ref-card">
+                            <h4>1. int (Integer)</h4>
+                            <p>Bilangan bulat (+/-) tanpa koma & tanpa kutip.</p>
+                            <code>umur = 13</code>
+                        </div>
+                        <div class="ref-card">
+                            <h4>2. float (Desimal)</h4>
+                            <p>Angka desimal memakai tanda titik (<code>.</code>).</p>
+                            <code>tinggi = 154.5</code>
+                        </div>
+                        <div class="ref-card">
+                            <h4>3. str (String)</h4>
+                            <p>Teks diapit tanda kutip ganda/tunggal.</p>
+                            <code>nama = "Ali"</code>
+                        </div>
+                        <div class="ref-card">
+                            <h4>4. bool (Boolean)</h4>
+                            <p>Hanya 2 nilai: <code>True</code> atau <code>False</code>.</p>
+                            <code>lulus = True</code>
+                        </div>
+                        <div class="ref-card">
+                            <h4>5. list (Daftar)</h4>
+                            <p>Pakai kurung siku <code>[ ]</code>, isinya BISA diubah.</p>
+                            <code>nilai = [85, 90]</code>
+                        </div>
+                        <div class="ref-card">
+                            <h4>6. tuple (Tetap)</h4>
+                            <p>Pakai kurung biasa <code>( )</code>, TIDAK BISA diubah.</p>
+                            <code>tgl = (13, 5, 2013)</code>
+                        </div>
+                        <div class="ref-card" style="grid-column: span 2;">
+                            <h4>7. dict (Dictionary / Kamus)</h4>
+                            <p>Pasangan kunci dan nilai (<em>key-value</em>) memakai kurung kurawal <code>{ "kunci": nilai }</code>.</p>
+                            <code>siswa = {"nama": "Ali", "nilai": 85}</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 1: PRAKTIK TAHAP 1 - SORTIR KARTU DATA KE KERANJANG PID
+             ========================================================= -->
+        <section class="tab-panel" id="panel-1">
+            <div class="section-head">
+                <h2>🧲 Praktik Tahap 1: Sortir Kartu Data ke Keranjang Tipe Data!</h2>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn-action btn-accent" onclick="resetSortingGame()">🔄 Acak Ulang Kartu (Ganti Kelompok)</button>
+                    <span class="badge-time">⏱️ Praktik Kelompok (15 Menit)</span>
+                </div>
+            </div>
+
+            <p style="margin-bottom: 12px; color: var(--text-muted); font-size: 1.05rem;">
+                👉 <strong>Cara Praktik di PID:</strong> Sentuh salah satu <strong>Kartu Data Biru</strong> di bawah ini (sampai berwarna kuning), lalu sentuh <strong>Keranjang Tipe Data</strong> yang tepat! (Setiap kartu benar = <strong>+10 Poin</strong> untuk kelompok yang sedang aktif).
+            </p>
+
+            <div id="sortFeedback" style="padding:10px 16px; border-radius:10px; margin-bottom:12px; font-weight:700; display:none;"></div>
+
+            <!-- KUMPULAN KARTU ACAK -->
+            <div class="card-pool" id="cardPool"></div>
+
+            <!-- 7 KERANJANG TIPE DATA PYTHON -->
+            <div class="baskets-grid" id="basketsContainer">
+                <div class="basket" onclick="placeCardInBasket('int')">
+                    <div class="basket-header">
+                        <strong>int</strong>
+                        <span>Bilangan Bulat</span>
+                    </div>
+                    <div class="basket-items" id="basket-int"></div>
+                </div>
+
+                <div class="basket" onclick="placeCardInBasket('float')">
+                    <div class="basket-header">
+                        <strong>float</strong>
+                        <span>Angka Desimal (.)</span>
+                    </div>
+                    <div class="basket-items" id="basket-float"></div>
+                </div>
+
+                <div class="basket" onclick="placeCardInBasket('str')">
+                    <div class="basket-header">
+                        <strong>str</strong>
+                        <span>Teks ("...")</span>
+                    </div>
+                    <div class="basket-items" id="basket-str"></div>
+                </div>
+
+                <div class="basket" onclick="placeCardInBasket('bool')">
+                    <div class="basket-header">
+                        <strong>bool</strong>
+                        <span>True / False</span>
+                    </div>
+                    <div class="basket-items" id="basket-bool"></div>
+                </div>
+
+                <div class="basket" onclick="placeCardInBasket('list')">
+                    <div class="basket-header">
+                        <strong>list</strong>
+                        <span>Daftar [ ... ]</span>
+                    </div>
+                    <div class="basket-items" id="basket-list"></div>
+                </div>
+
+                <div class="basket" onclick="placeCardInBasket('tuple')">
+                    <div class="basket-header">
+                        <strong>tuple</strong>
+                        <span>Tetap ( ... )</span>
+                    </div>
+                    <div class="basket-items" id="basket-tuple"></div>
+                </div>
+
+                <div class="basket" onclick="placeCardInBasket('dict')">
+                    <div class="basket-header">
+                        <strong>dict</strong>
+                        <span>Kamus {k: v}</span>
+                    </div>
+                    <div class="basket-items" id="basket-dict"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 2: PRAKTIK TAHAP 2 - STUDIO MERAKIT KODE PYTHON DI PID
+             ========================================================= -->
+        <section class="tab-panel" id="panel-2">
+            <div class="section-head">
+                <h2>🛠️ Praktik Tahap 2: Merakit Sintaks Kode Python di Layar PID</h2>
+                <span class="badge-time">⏱️ Langkah 4 Menyajikan Karya (15 Menit)</span>
+            </div>
+
+            <p style="color:var(--text-muted); margin-bottom:12px;">
+                👉 Pilih salah satu misi tipe data di bawah ini, lalu rakitlah nilai variabel Python-nya menggunakan <strong>Tombol Simbol Cepat PID</strong> atau ketik langsung, kemudian tekan <strong>Uji & Jalankan Kode Python</strong>!
+            </p>
+
+            <div class="mission-selector" id="missionButtons"></div>
+
+            <div class="grid-2">
+                <div class="panel-box">
+                    <h3 id="missionTitle">Misi 1: Merakit Tipe Data int (Integer)</h3>
+                    <p id="missionInstruction" style="color:var(--text-muted); margin-bottom:14px; font-size:1.05rem;"></p>
+
+                    <div style="font-size:0.9rem; color:var(--accent); font-weight:700;">⚡ Tombol Bantuan Simbol & Blok Koding Sentuh PID:</div>
+                    <div class="symbol-pad">
+                        <button class="sym-btn" onclick="insertSymbol('&quot;&quot;')">" "</button>
+                        <button class="sym-btn" onclick="insertSymbol('[ ]')">[ ]</button>
+                        <button class="sym-btn" onclick="insertSymbol('( )')">( )</button>
+                        <button class="sym-btn" onclick="insertSymbol('{ }')">{ }</button>
+                        <button class="sym-btn" onclick="insertSymbol(': ')">:</button>
+                        <button class="sym-btn" onclick="insertSymbol(', ')">,</button>
+                        <button class="sym-btn" onclick="insertSymbol('.')">.</button>
+                        <button class="sym-btn" onclick="insertSymbol('True')">True</button>
+                        <button class="sym-btn" onclick="insertSymbol('False')">False</button>
+                        <button class="sym-btn" onclick="insertSampleValue()" style="background:#0284c7; color:#fff;">💡 Isi Contoh Nilai</button>
+                        <button class="sym-btn" onclick="clearCodeInput()" style="background:#7f1d1d; color:#fff;">🗑️ Hapus</button>
+                    </div>
+
+                    <div class="code-Assembly-line">
+                        <span id="varNameLabel" style="color:#f8fafc; font-weight:bold;">umur_siswa =</span>
+                        <input type="text" id="userCodeInput" class="code-input-pid" placeholder="Ketik atau sentuh simbol di atas...">
+                    </div>
+
+                    <div style="margin-top: 16px; display:flex; gap:12px; flex-wrap:wrap;">
+                        <button class="btn-action btn-success" onclick="validateAndRunCode()">▶ Uji & Jalankan Kode Python (+20 Poin)</button>
+                    </div>
+                </div>
+
+                <div class="panel-box">
+                    <h3>💻 Layar Eksekusi & Output Python</h3>
+                    <div class="code-block" id="fullPythonPreview"># Kode lengkap yang akan dijalankan Python:
+umur_siswa = ...
+print("Nilai data:", umur_siswa)
+print("Tipe data:", type(umur_siswa))</div>
+
+                    <div class="output-block" id="pythonValidatorOutput">
+                        Menunggu kelompok menekan tombol "▶ Uji & Jalankan Kode Python"...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 3: PRAKTIK TAHAP 3 - DETEKTIF BUG & LIST VS TUPLE
+             ========================================================= -->
+        <section class="tab-panel" id="panel-3">
+            <div class="section-head">
+                <h2>🕵️ Praktik Tahap 3: Detektif Bug & Uji Coba Ubah Data (List vs Tuple)</h2>
+                <span class="badge-time">⏱️ Langkah 5 Evaluasi (10 Menit)</span>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel-box">
+                    <h3>🔬 Simulasi Mengapa `list` Bisa Diubah Sedangkan `tuple` Tetap</h3>
+                    <p style="color:var(--text-muted); margin-bottom:10px;">
+                        Ajak siswa menyentuh tombol di bawah ini untuk membuktikan perbedaan `list` <code>[ ]</code> dan `tuple` <code>( )</code>:
+                    </p>
+                    <div class="code-block">daftar_hobi = ["Membaca", "Koding", "Futsal"]   # list
+tgl_lahir   = (13, "Mei", 2013)                 # tuple</div>
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin:12px 0;">
+                        <button class="btn-action btn-primary" onclick="demoMutate('list')">✏️ Ubah Elemen List: daftar_hobi[1] = "Robotik"</button>
+                        <button class="btn-action btn-danger" onclick="demoMutate('tuple')">🔒 Coba Ubah Tuple: tgl_lahir[0] = 25</button>
+                    </div>
+
+                    <div class="output-block" id="mutateResult">Sentuh salah satu tombol eksperimen di atas!</div>
+                </div>
+
+                <div class="panel-box">
+                    <h3>🐞 Tantangan Perbaiki Bug Program Kelompok (+20 Poin)</h3>
+                    <div id="bugHeader" style="font-weight:700; color:var(--accent); margin-bottom:6px;">Kasus Bug 1 dari 4</div>
+                    <p id="bugStory" style="color:var(--text-light); margin-bottom:10px; font-size:1.05rem;"></p>
+                    <div class="code-block" id="bugBrokenCode"></div>
+                    <div id="bugChoices" style="display:grid; gap:10px; margin-top:12px;"></div>
+                    <div id="bugFeedback" style="margin-top:12px; padding:12px; border-radius:8px; display:none; font-weight:700;"></div>
+                    <button class="btn-action btn-accent" style="margin-top:12px;" onclick="nextBugCase()">Kasus Bug Berikutnya ➡</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 4: PODIUM SKOR KELOMPOK & REFLEKSI PENUTUP
+             ========================================================= -->
+        <section class="tab-panel" id="panel-4">
+            <div class="section-head">
+                <h2>🏆 Podium Skor Praktik Kelompok & Refleksi Pembelajaran</h2>
+                <span class="badge-time">⏱️ Kegiatan Penutup (10 Menit)</span>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel-box">
+                    <h3>🏅 Klasemen Akhir Kelompok Hari Ini</h3>
+                    <p style="color:var(--text-muted); margin-bottom:14px;">Guru juga dapat menambah/mengurangi poin apresiasi keaktifan diskusi secara langsung:</p>
+                    <div id="leaderboardList" style="display:grid; gap:10px;"></div>
+                </div>
+
+                <div class="panel-box">
+                    <h3>🌟 Polling Refleksi Sentuh PID</h3>
+                    <p style="color:var(--text-muted); margin-bottom:12px;">Bagaimana perasaanmu setelah praktik merakit 7 Tipe Data Python di PID hari ini?</p>
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; text-align:center;">
+                        <div class="panel-box" style="cursor:pointer; background:#0b1120;" onclick="voteReflect('r1')">
+                            <div style="font-size:2.2rem;">🤩</div>
+                            <div style="font-weight:700; margin-top:4px;">Sangat Paham & Seru!</div>
+                            <div id="r1" style="font-size:1.5rem; color:var(--accent); font-weight:800; margin-top:6px;">0</div>
+                        </div>
+                        <div class="panel-box" style="cursor:pointer; background:#0b1120;" onclick="voteReflect('r2')">
+                            <div style="font-size:2.2rem;">🤔</div>
+                            <div style="font-weight:700; margin-top:4px;">Masih Perlu Latihan Simbol</div>
+                            <div id="r2" style="font-size:1.5rem; color:var(--accent); font-weight:800; margin-top:6px;">0</div>
+                        </div>
+                        <div class="panel-box" style="cursor:pointer; background:#0b1120;" onclick="voteReflect('r3')">
+                            <div style="font-size:2.2rem;">🚀</div>
+                            <div style="font-weight:700; margin-top:4px;">Siap Lanjut Kalkulasi Data!</div>
+                            <div id="r3" style="font-size:1.5rem; color:var(--accent); font-weight:800; margin-top:6px;">0</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:18px; padding:14px; background:#0b1120; border-radius:12px; border-left:4px solid var(--accent);">
+                        <strong>📌 Kesimpulan Utama:</strong><br>
+                        Komputer memerlukan penentuan tipe data yang tepat: <code>int</code> (bulat), <code>float</code> (desimal), <code>str</code> (teks), <code>bool</code> (True/False), <code>list</code> (daftar bisa diubah), <code>tuple</code> (tetap), dan <code>dict</code> (pasangan kunci-nilai).
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // =====================================================
+        // 1. SISTEM SKOR KELOMPOK & TIMER PID
+        // =====================================================
+        const groups = [
+            { name: "Kelompok 1", score: 0 },
+            { name: "Kelompok 2", score: 0 },
+            { name: "Kelompok 3", score: 0 },
+            { name: "Kelompok 4", score: 0 },
+            { name: "Kelompok 5", score: 0 },
+            { name: "Kelompok 6", score: 0 }
+        ];
+        let activeGroupIdx = 0;
+
+        function renderGroupStrip() {
+            const strip = document.getElementById('groupStrip');
+            strip.innerHTML = '';
+            groups.forEach((g, idx) => {
+                const pill = document.createElement('div');
+                pill.className = 'group-pill' + (idx === activeGroupIdx ? ' active-turn' : '');
+                pill.innerHTML = `<span>${g.name}</span> <span class="pts">${g.score}</span>`;
+                pill.onclick = () => {
+                    activeGroupIdx = idx;
+                    renderGroupStrip();
+                };
+                strip.appendChild(pill);
+            });
+            renderLeaderboard();
+        }
+
+        function addPointsToActiveGroup(pts) {
+            groups[activeGroupIdx].score += pts;
+            renderGroupStrip();
+        }
+
+        function adjustGroupScore(idx, delta) {
+            groups[idx].score = Math.max(0, groups[idx].score + delta);
+            renderGroupStrip();
+        }
+
+        function renderLeaderboard() {
+            const box = document.getElementById('leaderboardList');
+            if (!box) return;
+            box.innerHTML = '';
+            groups.forEach((g, idx) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#0b1120; padding:10px 16px; border-radius:10px; border:1px solid #334155;';
+                row.innerHTML = `
+                    <strong style="font-size:1.1rem;">${g.name} ${idx === activeGroupIdx ? '⭐ (Aktif)' : ''}</strong>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.3rem; font-weight:800; color:#fde047;">${g.score} Poin</span>
+                        <button class="btn-sm" onclick="adjustGroupScore(${idx}, 10)">+10</button>
+                        <button class="btn-sm" onclick="adjustGroupScore(${idx}, -10)">-10</button>
+                    </div>
+                `;
+                box.appendChild(row);
+            });
+        }
+
+        // TIMER
+        let timeRemaining = 600;
+        let timerRef = null;
+
+        function updateTimerText() {
+            const m = String(Math.floor(timeRemaining / 60)).padStart(2, '0');
+            const s = String(timeRemaining % 60).padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+        }
+
+        function setTimer(mins) {
+            clearInterval(timerRef);
+            timerRef = null;
+            document.getElementById('btnTimerToggle').textContent = '▶ Mulai';
+            timeRemaining = mins * 60;
+            updateTimerText();
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('btnTimerToggle');
+            if (timerRef) {
+                clearInterval(timerRef);
+                timerRef = null;
+                btn.textContent = '▶ Lanjut';
+            } else {
+                btn.textContent = '⏸ Jeda';
+                timerRef = setInterval(() => {
+                    if (timeRemaining > 0) {
+                        timeRemaining--;
+                        updateTimerText();
+                    } else {
+                        clearInterval(timerRef);
+                        timerRef = null;
+                        btn.textContent = '⏰ Habis';
+                    }
+                }, 1000);
+            }
+        }
+
+        function switchTab(idx, defaultMins) {
+            document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+            document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+            setTimer(defaultMins);
+        }
+
+        // =====================================================
+        // 2. PEMANTIK "23 + 7 = 237"
+        // =====================================================
+        let pMode = 'str';
+        function setPemantikMode(m) {
+            pMode = m;
+            updatePemantik();
+        }
+        function updatePemantik() {
+            const a = document.getElementById('pemantikA').value || '0';
+            const b = document.getElementById('pemantikB').value || '0';
+            const code = document.getElementById('pemantikCode');
+            const out = document.getElementById('pemantikOutput');
+            if (pMode === 'str') {
+                code.textContent = `a = "${a}"   # Tipe data: str (Teks)\nb = "${b}"   # Tipe data: str (Teks)\nprint(a + b)`;
+                out.textContent = `Output: "${a}${b}" (Digabungkan sebagai teks karena diapit tanda kutip!)`;
+            } else {
+                const res = parseInt(a, 10) + parseInt(b, 10);
+                code.textContent = `a = ${a}   # Tipe data: int (Bilangan Bulat)\nb = ${b}   # Tipe data: int (Bilangan Bulat)\nprint(a + b)`;
+                out.textContent = `Output: ${res} (Dijumlahkan secara matematika karena bertipe Integer!)`;
+            }
+        }
+
+        // =====================================================
+        // 3. TAHAP 1: SORTIR KARTU DATA DI PID
+        // =====================================================
+        const masterCards = [
+            { id: 1, label: '85', type: 'int' },
+            { id: 2, label: '-15', type: 'int' },
+            { id: 3, label: '154.5', type: 'float' },
+            { id: 4, label: '3.14', type: 'float' },
+            { id: 5, label: '"Ali"', type: 'str' },
+            { id: 6, label: '"SMP Kelas 7"', type: 'str' },
+            { id: 7, label: 'True', type: 'bool' },
+            { id: 8, label: 'False', type: 'bool' },
+            { id: 9, label: '["Ali", "Budi", "Siti"]', type: 'list' },
+            { id: 10, label: '[85, 90, 75]', type: 'list' },
+            { id: 11, label: '(2013, 5, 13)', type: 'tuple' },
+            { id: 12, label: '("Jakarta", "Bandung")', type: 'tuple' },
+            { id: 13, label: '{"nama": "Ali", "nilai": 85}', type: 'dict' },
+            { id: 14, label: '{"barang": "Buku", "harga": 5000}', type: 'dict' }
+        ];
+
+        let remainingCards = [];
+        let selectedCardId = null;
+
+        function resetSortingGame() {
+            selectedCardId = null;
+            remainingCards = [...masterCards].sort(() => Math.random() - 0.5);
+            ['int', 'float', 'str', 'bool', 'list', 'tuple', 'dict'].forEach(t => {
+                document.getElementById(`basket-${t}`).innerHTML = '';
+            });
+            document.getElementById('sortFeedback').style.display = 'none';
+            renderCardPool();
+        }
+
+        function renderCardPool() {
+            const pool = document.getElementById('cardPool');
+            pool.innerHTML = '';
+            if (remainingCards.length === 0) {
+                pool.innerHTML = `<div style="color:#86efac; font-size:1.3rem; font-weight:800;">🎉 Luar Biasa! Semua kartu data berhasil dikelompokkan dengan tepat!</div>`;
+                return;
+            }
+            remainingCards.forEach(c => {
+                const el = document.createElement('div');
+                el.className = 'data-card' + (c.id === selectedCardId ? ' selected' : '');
+                el.textContent = c.label;
+                el.onclick = () => {
+                    selectedCardId = c.id;
+                    renderCardPool();
+                };
+                pool.appendChild(el);
+            });
+        }
+
+        function placeCardInBasket(basketType) {
+            const fb = document.getElementById('sortFeedback');
+            if (!selectedCardId) {
+                fb.style.display = 'block';
+                fb.style.background = '#1e3a8a';
+                fb.style.color = '#bae6fd';
+                fb.textContent = '👆 Sentuh salah satu Kartu Data Biru terlebih dahulu, baru sentuh keranjangnya!';
+                return;
+            }
+            const cardObj = remainingCards.find(c => c.id === selectedCardId);
+            if (!cardObj) return;
+
+            fb.style.display = 'block';
+            if (cardObj.type === basketType) {
+                // Correct
+                addPointsToActiveGroup(10);
+                fb.style.background = '#14532d';
+                fb.style.color = '#dcfce7';
+                fb.textContent = `✅ BENAR! ${cardObj.label} termasuk tipe data ${basketType}. (+10 Poin untuk ${groups[activeGroupIdx].name})`;
+
+                const chip = document.createElement('div');
+                chip.className = 'placed-chip';
+                chip.textContent = cardObj.label;
+                document.getElementById(`basket-${basketType}`).appendChild(chip);
+
+                remainingCards = remainingCards.filter(c => c.id !== selectedCardId);
+                selectedCardId = null;
+                renderCardPool();
+            } else {
+                fb.style.background = '#7f1d1d';
+                fb.style.color = '#fee2e2';
+                fb.textContent = `❌ Kurang Tepat! Perhatikan simbol pada ${cardObj.label}, bukan tipe data ${basketType}. Coba lagi!`;
+            }
+        }
+
+        // =====================================================
+        // 4. TAHAP 2: STUDIO MERAKIT KODE PYTHON (7 MISI)
+        // =====================================================
+        const codingMissions = [
+            {
+                type: 'int',
+                title: 'Misi 1: Merakit Tipe Data int (Integer)',
+                varName: 'umur_siswa',
+                desc: 'Masukkan nilai bilangan bulat (positif atau negatif) TANPA tanda kutip dan TANPA titik desimal!',
+                sample: '13',
+                validate: (val) => /^-?\d+$/.test(val.trim()),
+                hint: 'Pastikan hanya angka bulat tanpa tanda kutip dan tanpa koma/titik (contoh: 13 atau 25).'
+            },
+            {
+                type: 'float',
+                title: 'Misi 2: Merakit Tipe Data float (Desimal)',
+                varName: 'tinggi_badan',
+                desc: 'Masukkan nilai angka desimal menggunakan tanda TITIK (.) sebagai pemisah desimal!',
+                sample: '154.5',
+                validate: (val) => /^-?\d+\.\d+$/.test(val.trim()),
+                hint: 'Gunakan angka dengan tanda titik desimal (contoh: 154.5 atau 36.8).'
+            },
+            {
+                type: 'str',
+                title: 'Misi 3: Merakit Tipe Data str (String / Teks)',
+                varName: 'nama_ketua',
+                desc: 'Masukkan teks nama siswa atau kelompok yang DIAPIT TANDA KUTIP ("...")!',
+                sample: '"Salik"',
+                validate: (val) => /^(".*"|'.*')$/.test(val.trim()) && val.trim().length >= 3,
+                hint: 'Teks String wajib diawali dan diakhiri dengan tanda kutip (contoh: "Ali" atau "Kelompok 1").'
+            },
+            {
+                type: 'bool',
+                title: 'Misi 4: Merakit Tipe Data bool (Boolean)',
+                varName: 'hadir_hari_ini',
+                desc: 'Masukkan nilai logika Boolean (Hanya boleh True atau False dengan huruf awal Kapital tanpa kutip)!',
+                sample: 'True',
+                validate: (val) => val.trim() === 'True' || val.trim() === 'False',
+                hint: 'Ketik atau sentuh tombol True atau False (tanpa tanda kutip, huruf awal kapital).'
+            },
+            {
+                type: 'list',
+                title: 'Misi 5: Merakit Tipe Data list (Daftar Bisa Diubah)',
+                varName: 'daftar_nilai',
+                desc: 'Rakitlah kumpulan minimal 2 data di dalam tanda KURUNG SIKU [ ... ] yang dipisahkan tanda koma (,)!',
+                sample: '[85, 90, 95]',
+                validate: (val) => /^\[.+,.+\]$/.test(val.trim()),
+                hint: 'List wajib diawali kurung siku buka [ , dipisahkan koma, dan diakhiri kurung siku tutup ] (contoh: [85, 90] atau ["Buku", "Pena"]).'
+            },
+            {
+                type: 'tuple',
+                title: 'Misi 6: Merakit Tipe Data tuple (Kumpulan Tetap)',
+                varName: 'tanggal_lahir',
+                desc: 'Rakitlah kumpulan minimal 2 data tetap di dalam tanda KURUNG BIASA ( ... ) yang dipisahkan tanda koma (,)!',
+                sample: '(13, "Mei", 2013)',
+                validate: (val) => /^\(.+,.+\)$/.test(val.trim()),
+                hint: 'Tuple wajib menggunakan kurung biasa ( ... ) dan dipisahkan tanda koma (contoh: (13, 5, 2013)).'
+            },
+            {
+                type: 'dict',
+                title: 'Misi 7: Merakit Tipe Data dict (Kamus Key-Value)',
+                varName: 'biodata_siswa',
+                desc: 'Rakitlah pasangan kunci dan nilai di dalam KURUNG KURAWAL { "kunci": nilai } menggunakan titik dua (:)!',
+                sample: '{"nama": "Ali", "nilai": 90}',
+                validate: (val) => /^\{.+:.+\}$/.test(val.trim()),
+                hint: 'Dictionary wajib memakai kurung kurawal { } dan tanda titik dua : untuk memisahkan kunci dan nilai (contoh: {"nama": "Ali"}).'
+            }
+        ];
+
+        let currentMissionIdx = 0;
+
+        function renderMissionButtons() {
+            const container = document.getElementById('missionButtons');
+            container.innerHTML = '';
+            codingMissions.forEach((m, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'mission-btn' + (idx === currentMissionIdx ? ' active' : '');
+                btn.textContent = `${idx + 1}. ${m.type}`;
+                btn.onclick = () => selectMission(idx);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectMission(idx) {
+            currentMissionIdx = idx;
+            renderMissionButtons();
+            const m = codingMissions[idx];
+            document.getElementById('missionTitle').textContent = m.title;
+            document.getElementById('missionInstruction').textContent = m.desc;
+            document.getElementById('varNameLabel').textContent = `${m.varName} =`;
+            document.getElementById('userCodeInput').value = '';
+            updateLivePreview();
+            const out = document.getElementById('pythonValidatorOutput');
+            out.style.background = '#052e16';
+            out.style.borderColor = '#22c55e';
+            out.style.color = '#86efac';
+            out.textContent = 'Silakan rakit kode pada kotak di sebelah kiri lalu tekan "▶ Uji & Jalankan Kode Python"...';
+        }
+
+        function insertSymbol(sym) {
+            const inp = document.getElementById('userCodeInput');
+            const val = inp.value;
+            if (sym === '""') {
+                inp.value = `"${val}"`;
+            } else if (sym === '[ ]') {
+                inp.value = `[${val}]`;
+            } else if (sym === '( )') {
+                inp.value = `(${val})`;
+            } else if (sym === '{ }') {
+                inp.value = `{${val}}`;
+            } else {
+                inp.value = val + sym;
+            }
+            inp.focus();
+            updateLivePreview();
+        }
+
+        function insertSampleValue() {
+            const m = codingMissions[currentMissionIdx];
+            document.getElementById('userCodeInput').value = m.sample;
+            updateLivePreview();
+        }
+
+        function clearCodeInput() {
+            document.getElementById('userCodeInput').value = '';
+            updateLivePreview();
+        }
+
+        document.getElementById('userCodeInput').addEventListener('input', updateLivePreview);
+
+        function updateLivePreview() {
+            const m = codingMissions[currentMissionIdx];
+            const val = document.getElementById('userCodeInput').value || '...';
+            document.getElementById('fullPythonPreview').textContent =
+`# Kode lengkap yang akan dijalankan Python:
+${m.varName} = ${val}
+print("Nilai data:", ${m.varName})
+print("Tipe data:", type(${m.varName}))`;
+        }
+
+        function validateAndRunCode() {
+            const m = codingMissions[currentMissionIdx];
+            const rawVal = document.getElementById('userCodeInput').value.trim();
+            const out = document.getElementById('pythonValidatorOutput');
+
+            if (m.validate(rawVal)) {
+                addPointsToActiveGroup(20);
+                out.style.background = '#052e16';
+                out.style.borderColor = '#22c55e';
+                out.style.color = '#86efac';
+                out.textContent =
+`✅ SINTAKS PYTHON BENAR! (+20 Poin untuk ${groups[activeGroupIdx].name})
+-----------------------------------------
+Output Program:
+Nilai data: ${rawVal}
+Tipe data: <class '${m.type}'>`;
+            } else {
+                out.style.background = '#450a0a';
+                out.style.borderColor = '#ef4444';
+                out.style.color = '#fca5a5';
+                out.textContent =
+`❌ SyntaxError / Tipe Data Belum Tepat!
+-----------------------------------------
+Petunjuk Perbaikan:
+${m.hint}`;
+            }
+        }
+
+        // =====================================================
+        // 5. TAHAP 3: SIMULASI LIST VS TUPLE & DETEKTIF BUG
+        // =====================================================
+        function demoMutate(mode) {
+            const out = document.getElementById('mutateResult');
+            if (mode === 'list') {
+                out.style.background = '#052e16';
+                out.style.borderColor = '#22c55e';
+                out.style.color = '#86efac';
+                out.textContent =
+`>>> daftar_hobi[1] = "Robotik"
+>>> print(daftar_hobi)
+['Membaca', 'Robotik', 'Futsal']
+
+✅ BERHASIL DIUBAH! Karena tipe data list [ ] isinya fleksibel dan dapat diubah.`;
+            } else {
+                out.style.background = '#450a0a';
+                out.style.borderColor = '#ef4444';
+                out.style.color = '#fca5a5';
+                out.textContent =
+`>>> tgl_lahir[0] = 25
+TypeError: 'tuple' object does not support item assignment
+
+🔒 DITOLAK PYTHON! Karena tipe data tuple ( ) bersifat TETAP dan tidak dapat diubah setelah dibuat.`;
+            }
+        }
+
+        const bugCases = [
+            {
+                story: "Budi ingin menjumlahkan uang saku 15000 dan 5000 agar hasilnya 20000, tetapi output-nya malah '150005000'. Bagaimana cara memperbaiki kodenya?",
+                broken: `uang_1 = "15000"\nuang_2 = "5000"\nprint(uang_1 + uang_2)`,
+                options: [
+                    'Hapus tanda kutip menjadi: uang_1 = 15000 dan uang_2 = 5000 (tipe int)',
+                    'Ganti tanda kutip dengan kurung siku [15000]',
+                    'Ubah menjadi True dan False'
+                ],
+                correct: 0,
+                exp: 'Tepat! Tanpa tanda kutip, Python membacanya sebagai bilangan bulat (int) sehingga dijumlahkan menjadi 20000.'
+            },
+            {
+                story: "Siti ingin menyimpan daftar belanja yang isinya BISA DIUBAH dan ditambah nanti, tetapi kodenya error saat diubah. Perbaikan yang benar adalah...",
+                broken: `belanja = ("Buku", "Pensil", "Penghapus")`,
+                options: [
+                    'Ganti kurung biasa ( ) menjadi kurung siku [ ] agar bertipe list',
+                    'Hapus semua tanda kutip pada teks',
+                    'Ganti menjadi tipe boolean True'
+                ],
+                correct: 0,
+                exp: 'Benar! Kurung biasa ( ) adalah tuple (tidak bisa diubah). Gunakan kurung siku [ ] untuk membuat list.'
+            },
+            {
+                story: "Ali ingin menyimpan data pasangan kunci 'nama' dan nilai 'Ali' menggunakan Dictionary (dict), tetapi kodenya error. Bagaimana perbaikannya?",
+                broken: `siswa = {"nama" = "Ali"}`,
+                options: [
+                    'Ganti tanda sama dengan (=) di dalam kurung kurawal menjadi titik dua (:) -> {"nama": "Ali"}',
+                    'Ganti kurung kurawal { } menjadi tanda kutip',
+                    'Hapus kata "nama"'
+                ],
+                correct: 0,
+                exp: 'Hebat! Pasangan key-value di dalam dict dipisahkan dengan tanda titik dua (:), bukan (=).'
+            },
+            {
+                story: "Rani menulis angka desimal 45,5 kg menggunakan tanda koma sehingga Python menganggapnya tuple. Bagaimana penulisan float yang benar?",
+                broken: `berat_badan = 45,5`,
+                options: [
+                    'Gunakan tanda titik (.) untuk angka desimal di Python -> berat_badan = 45.5',
+                    'Beri tanda kutip -> "45,5"',
+                    'Beri kurung siku -> [45,5]'
+                ],
+                correct: 0,
+                exp: 'Luar biasa! Tipe data float di Python selalu menggunakan tanda titik (.) sebagai pemisah desimal.'
+            }
+        ];
+
+        let bugIdx = 0;
+        let bugAnswered = false;
+
+        function renderBugCase() {
+            bugAnswered = false;
+            const b = bugCases[bugIdx];
+            document.getElementById('bugHeader').textContent = `Kasus Bug ${bugIdx + 1} dari ${bugCases.length}`;
+            document.getElementById('bugStory').textContent = b.story;
+            document.getElementById('bugBrokenCode').textContent = b.broken;
+            document.getElementById('bugFeedback').style.display = 'none';
+
+            const box = document.getElementById('bugChoices');
+            box.innerHTML = '';
+            b.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-action';
+                btn.style.cssText = 'background:#334155; color:#fff; text-align:left; justify-content:flex-start; border:2px solid #475569;';
+                btn.textContent = opt;
+                btn.onclick = () => checkBugChoice(idx, btn);
+                box.appendChild(btn);
+            });
+        }
+
+        function checkBugChoice(idx, btn) {
+            if (bugAnswered) return;
+            bugAnswered = true;
+            const b = bugCases[bugIdx];
+            const fb = document.getElementById('bugFeedback');
+            fb.style.display = 'block';
+            if (idx === b.correct) {
+                btn.style.background = '#14532d';
+                btn.style.borderColor = '#22c55e';
+                addPointsToActiveGroup(20);
+                fb.style.background = '#14532d';
+                fb.style.color = '#dcfce7';
+                fb.textContent = `🎉 BUG BERHASIL DIPERBAIKI! (+20 Poin untuk ${groups[activeGroupIdx].name}) — ${b.exp}`;
+            } else {
+                btn.style.background = '#7f1d1d';
+                btn.style.borderColor = '#ef4444';
+                fb.style.background = '#7f1d1d';
+                fb.style.color = '#fee2e2';
+                fb.textContent = `❌ Belum tepat. ${b.exp}`;
+            }
+        }
+
+        function nextBugCase() {
+            bugIdx = (bugIdx + 1) % bugCases.length;
+            renderBugCase();
+        }
+
+        function voteReflect(id) {
+            const el = document.getElementById(id);
+            el.textContent = parseInt(el.textContent, 10) + 1;
+        }
+
+        // INIT ALL
+        renderGroupStrip();
+        resetSortingGame();
+        selectMission(0);
+        renderBugCase();
+    </script>
+</body>
+</html>
